@@ -65,14 +65,38 @@ def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
 
     return (training_data, validation_data, test_data)
 
+def reformat_data_2(tr_digits, va_digits, te_digits):
+    training_digit_images = [np.reshape(x, (784, 1)) for x in tr_digits[0]]
+    training_inputs = training_digit_images
+
+    training_digit_labels = [vectorized_result(y) for y in tr_digits[1]]
+    training_results = training_digit_labels
+
+    training_data = zip(training_inputs, training_results)
+
+    validation_digit_images = [np.reshape(x, (784, 1)) for x in va_digits[0]]
+    validation_inputs = validation_digit_images
+    validation_results = va_digits[1]
+
+    validation_data = zip(validation_inputs, validation_results)
+
+    test_digit_images = [np.reshape(x, (784, 1)) for x in te_digits[0]]
+    test_inputs = test_digit_images
+
+    test_results = te_digits[1]
+
+    test_data = zip(test_inputs, test_results)
+
+    return (training_data, validation_data, test_data)
+
 def load_data():
     digit_data_path = 'data/mnist.pkl'
-    symbol_data_path = 'data/symbols.pkl'
+    #symbol_data_path = 'data/symbols.pkl'
     tr_digits, va_digits, te_digits = load_raw_data(digit_data_path)
 
-    tr_symbols, va_symbols, te_symbols = load_raw_data(symbol_data_path)
-    training_data, validation_data, test_data = reformat_data(tr_digits,
-        tr_symbols, va_digits, va_symbols, te_digits, te_symbols)
+    #tr_symbols, va_symbols, te_symbols = load_raw_data(symbol_data_path)
+    training_data, validation_data, test_data = reformat_data_2(tr_digits,
+        va_digits, te_digits)
 
     return (training_data, validation_data, test_data)
 

@@ -14,13 +14,10 @@ net = network.Network([784, 30, 13])
 net.stochastic_gradient_descent(training_data, 10, 10, 3.0, test_data=test_data)
 
 # segment big image
-segments = get_segments('smaller_test.png')
-reshaped_segments = []
-for segment in segments:
-    reshaped_segments.append(np.reshape(segment, (784,1)))
+segments = get_segments('test_img.png')
 
 results = []
-for seg in reshaped_segments:
+for seg in segments:
     results.append(np.argmax(net.feedforward(seg)))
 
 print results
