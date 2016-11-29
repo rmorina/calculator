@@ -100,6 +100,7 @@ def get_segments(path):
     for i in images:
         resized_image = Image.fromarray(numpy.array(i), 'L').resize((28,28))
         resized_array = numpy.asarray(resized_image)
+        resized_array = resized_array.astype(float)
         resized_array = resized_array / 255.0
-        resized_images.append(resized_image)
+        resized_images.append(np.reshape(resized_array, (784,1)))
     return resized_images
