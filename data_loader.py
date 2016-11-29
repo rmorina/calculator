@@ -16,13 +16,13 @@ def load_raw_data(path):
     training_data, validation_data, test_data = cPickle.load(open(path, "rb" ))
     return (training_data, validation_data, test_data)
 
-def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits, 
+def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
         te_symbols):
     """
-        Combines the data set for digits and arithmetic symbols into one data 
-        sets and formats it so that it is convinient for the neural netowk to 
+        Combines the data set for digits and arithmetic symbols into one data
+        sets and formats it so that it is convinient for the neural netowk to
         train and test. In particular the final ``training_data`` returned
-        is a list containing``(x, y)``. where ``x`` is a 784-dimensional 
+        is a list containing``(x, y)``. where ``x`` is a 784-dimensional
         numpy.ndarray containing the input image and ``y`` is a 13-dimensional
         numpy.ndarray representing the unit vector corresponding to the
         correct digit for ``x`` or one of the '+', '-', 'x' which are
@@ -50,7 +50,7 @@ def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
     validation_digit_images = [np.reshape(x, (784, 1)) for x in va_digits[0]]
     validation_symbol_images = [np.reshape(x, (784, 1)) for x in va_symbols[0]]
     validation_inputs = validation_digit_images + validation_symbol_images
-    
+
     validation_results = np.append(va_digits[1], va_symbols[1])
 
     validation_data = zip(validation_inputs, validation_results)
@@ -66,10 +66,10 @@ def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
     return (training_data, validation_data, test_data)
 
 def load_data():
-    digit_data_path = '../data/mnist.pkl'
-    symbol_data_path = '../data/symbols.pkl'
+    digit_data_path = 'data/mnist.pkl'
+    symbol_data_path = 'data/symbols.pkl'
     tr_digits, va_digits, te_digits = load_raw_data(digit_data_path)
-    
+
     tr_symbols, va_symbols, te_symbols = load_raw_data(symbol_data_path)
     training_data, validation_data, test_data = reformat_data(tr_digits,
         tr_symbols, va_digits, va_symbols, te_digits, te_symbols)
