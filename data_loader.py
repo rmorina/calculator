@@ -65,6 +65,8 @@ def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
 
     return (training_data, validation_data, test_data)
 
+# only load the training digits. Temporary until we have more training images
+# for arithmetic symbols
 def reformat_data_2(tr_digits, va_digits, te_digits):
     training_digit_images = [np.reshape(x, (784, 1)) for x in tr_digits[0]]
     training_inputs = training_digit_images

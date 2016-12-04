@@ -8,26 +8,35 @@ A module to implement the stochastic gradient descent learning
 algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation. 
 """
-
+import cPickle
 import numpy as np
 import random
 
 class Network(object):
-
-    def __init__(self, sizes):
+    
+    parameters_path = 'parameters/parameters.pkl'
+    
+    def __init__(self, sizes, load_parameters=False):
         """sizes is a list whose length indicates the number of layers the
         network will use and the individual elements indicate the number of 
         elements in each layer of the network"""
         self.num_layers = len(sizes)
         self.sizes = sizes
-        # each layer has its bias. Notice layer one is the input layer and
-        # hence it inherently does not have a bias
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = []
-        for i in xrange(len(sizes) - 1):
-            cur_layer_size = sizes[i]
-            next_layer_size = sizes[i + 1]
-            self.weights += [np.random.randn(next_layer_size, cur_layer_size)]
+        if (load_parameters):
+            (self.weights, self.biases, self.training_accuracy) = self.load_parameters()
+        else:
+            # each layer has its bias. Notice layer one is the input layer and
+            # hence it inherently does not have a bias
+            self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
+            self.weights = []
+            self.training_accuracy = 0
+            for i in xrange(len(sizes) - 1):
+                cur_layer_size = sizes[i]
+                next_layer_size = sizes[i + 1]
+                self.weights += [np.random.randn(next_layer_size, cur_layer_size)]
+
+    def recognize(self, input_vector):
+        return np.argmax(self.feedforward(input_vector))
 
     def feedforward(self, a):
         """Returns the output of the network by propagating forward the output 
@@ -47,8 +56,12 @@ class Network(object):
             epochs - number of epochs to train for
             mini_batch_size - size of the mini-batches to use when sampling
             eta - learning rate"""
+        best_weights = self.weights 
+        best_biases = self.biases
+
         if test_data: test_len = len(test_data)
         training_len = len(training_data)
+        # begin training
         for i in xrange(epochs):
             random.shuffle(training_data)
             mini_batches = []
@@ -59,10 +72,31 @@ class Network(object):
                 # taining data in the mini batch
                 self.update_parameters(mini_batch, eta)
             if test_data:
-                print ("Epoch %d: %d / %d" % 
-                    (i, self.evaluate(test_data), test_len))
+                cur_accuracy = self.evaluate(test_data)
+                if (cur_accuracy > self.training_accuracy):
+                    self.training_accuracy = cur_accuracy
+                    best_weights = self.weights
+                    best_biases = self.biases
+                print ("Epoch %d: %d / %d" % (i, self.training_accuracy, test_len))
             else:
                 print("Epoch %d complete" % i)
+        if (test_data):
+            self.weights = best_weights
+            self.biases = best_biases
+        self.save_parameters()
+
+    def train(self, training_data, test_data=None, epochs=40, mini_batch_size=10,
+            eta=3.0):
+        self.stochastic_gradient_descent(training_data, epochs, mini_batch_size,
+            eta, test_data)
+
+    def save_parameters(self):
+        parameters = (self.weights, self.biases, self.training_accuracy)
+        cPickle.dump(parameters, open(Network.parameters_path, "wb" ))
+
+    def load_parameters(self):
+        (self.weights, self.biases, self.best_training_accuracy) = cPickle.load(
+            open(Network.parameters_path, "rb" ))
 
     def update_parameters(self, mini_batch, eta):
         """update the network's weight and biases by applying gradient descent
@@ -126,7 +160,7 @@ class Network(object):
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
         \partial a for the output activations."""
-        return (output_activations-y)
+        return (output_activations - y)
 
 #### Helper functions
 def sigmoid(z):
@@ -139,7 +173,3 @@ def sigmoid(z):
 def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
-
-
-
-
