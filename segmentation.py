@@ -4,8 +4,11 @@ Library for segmenting image into separate digits.
 
 from PIL import Image, ImageOps
 import numpy
+import scipy
+import scipy.misc
+import cv2
 
-BINARY_THRESHOLD = 200
+BINARY_THRESHOLD = 130
 CUSHION = 20
 
 def scale(img):
@@ -76,9 +79,12 @@ def get_image_segments(connected_components):
                 max_col = pixel[1]
         height = max_row - min_row + CUSHION*2
         width = max_col - min_col + CUSHION*2
+        # TODO: this can break! need to check max width and height of image
+        bottom_right_row = max_row + CUSHION
+        bottom_right_col = max_col + CUSHION
         top_left_row = max(min_row - CUSHION, 0)
         top_left_col = max(min_col - CUSHION, 0)
-        image_segments.append((top_left_row, top_left_col, width, height))
+        image_segments.append((top_left_row, top_left_col, bottom_right_row, bottom_right_col))
     return image_segments
 
 
@@ -87,20 +93,26 @@ def get_segments(path):
     img = ImageOps.invert(img)
     img_list = numpy.asarray(img)
     scaled_img = scale(img_list)
+    binary_img = [[x*255 for x in row] for row in scaled_img]
+    cv2.imwrite('blackwhite.png', numpy.asarray(img))
+    cv2.imwrite('binary.png', numpy.asarray(binary_img))
     connected_components = get_connected_components(scaled_img)
     image_segments = get_image_segments(connected_components)
+    image_segments = sorted(image_segments, key=lambda x: x[1])
     images = []
     for seg in image_segments:
         img_seg = []
-        top_left_row, top_left_col, width, height = seg
-        for r in xrange(top_left_row, top_left_row + height):
-            img_seg.append(img_list[r][top_left_col:top_left_col+width])
+        top_left_row, top_left_col, bottom_right_row, bottom_right_col = seg
+        for r in xrange(top_left_row, bottom_right_row):
+            img_seg.append(binary_img[r][top_left_col:bottom_right_col]) #used to be img_list
         images.append(img_seg)
     resized_images = []
-    for i in images:
-        resized_image = Image.fromarray(numpy.array(i), 'L').resize((28,28))
+    for i in xrange(len(images)):
+        resized_image = scipy.misc.imresize(numpy.array(images[i]), (28,28), 'cubic')
+        cv2.imwrite('resized-'+str(i)+'.png', resized_image)
         resized_array = numpy.asarray(resized_image)
         resized_array = resized_array.astype(float)
         resized_array = resized_array / 255.0
-        resized_images.append(np.reshape(resized_array, (784,1)))
-    return resized_images
+        resized_images.append(numpy.reshape(resized_array, (784,1)))
+        print resized_array
+    return resized_images, image_segments, images
