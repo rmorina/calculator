@@ -38,10 +38,12 @@ def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
         turns to simply be a convinience when using the neural network.
     """
     training_digit_images = [np.reshape(x, (784, 1)) for x in tr_digits[0]]
+    training_digit_images = training_digit_images[:40000]
     training_symbol_images = [np.reshape(x, (784, 1)) for x in tr_symbols[0]]
     training_inputs = training_digit_images + training_symbol_images
 
     training_digit_labels = [vectorized_result(y) for y in tr_digits[1]]
+    training_digit_labels = training_digit_labels[:40000]
     training_symbol_labels = [vectorized_result(y) for y in tr_symbols[1]]
     training_results = training_digit_labels + training_symbol_labels
 
@@ -67,39 +69,43 @@ def reformat_data(tr_digits, tr_symbols, va_digits, va_symbols, te_digits,
 
 # only load the training digits. Temporary until we have more training images
 # for arithmetic symbols
-def reformat_data_2(tr_digits, va_digits, te_digits):
-    training_digit_images = [np.reshape(x, (784, 1)) for x in tr_digits[0]]
+def reformat_data_2(tr_symbols, va_symbols, te_symbols):
+    training_digit_images = [np.reshape(x, (784, 1)) for x in tr_symbols[0]]
     training_inputs = training_digit_images
-
-    training_digit_labels = [vectorized_result(y) for y in tr_digits[1]]
+    training_digit_labels = [vectorized_result(y) for y in tr_symbols[1]]
     training_results = training_digit_labels
-
     training_data = zip(training_inputs, training_results)
 
-    validation_digit_images = [np.reshape(x, (784, 1)) for x in va_digits[0]]
+    validation_digit_images = [np.reshape(x, (784, 1)) for x in va_symbols[0]]
     validation_inputs = validation_digit_images
-    validation_results = va_digits[1]
+    validation_results = va_symbols[1]
 
     validation_data = zip(validation_inputs, validation_results)
 
-    test_digit_images = [np.reshape(x, (784, 1)) for x in te_digits[0]]
+    test_digit_images = [np.reshape(x, (784, 1)) for x in te_symbols[0]]
     test_inputs = test_digit_images
 
-    test_results = te_digits[1]
+    test_results = te_symbols[1]
 
     test_data = zip(test_inputs, test_results)
 
     return (training_data, validation_data, test_data)
 
 def load_data():
-    digit_data_path = 'data/mnist.pkl'
-    #symbol_data_path = 'data/symbols.pkl'
-    tr_digits, va_digits, te_digits = load_raw_data(digit_data_path)
+    #digit_data_path = 'processed_data/mnist.pkl'
+    symbol_data_path = 'processed_data/symbols.pkl'
+    
+    #tr_digits, va_digits, te_digits = load_raw_data(digit_data_path)
 
-    #tr_symbols, va_symbols, te_symbols = load_raw_data(symbol_data_path)
-    training_data, validation_data, test_data = reformat_data_2(tr_digits,
-        va_digits, te_digits)
-
+    tr_symbols, va_symbols, te_symbols = load_raw_data(symbol_data_path)
+    
+    #training_data, validation_data, test_data = reformat_data(tr_digits, 
+    #    tr_symbols, va_digits, va_symbols, te_digits, te_symbols)
+    
+    # training_data, validation_data, test_data = reformat_data_2(tr_digits,
+    #     va_digits, te_digits)
+    training_data, validation_data, test_data = reformat_data_2(tr_symbols, 
+        va_symbols, te_symbols)
     return (training_data, validation_data, test_data)
 
 def vectorized_result(j):
