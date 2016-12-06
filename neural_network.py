@@ -23,7 +23,7 @@ class Network(object):
         self.num_layers = len(sizes)
         self.sizes = sizes
         if (load_parameters):
-            (self.weights, self.biases, self.training_accuracy) = self.load_parameters()
+            self.load_parameters()
         else:
             # each layer has its bias. Notice layer one is the input layer and
             # hence it inherently does not have a bias
@@ -86,7 +86,7 @@ class Network(object):
         self.save_parameters()
 
     def train(self, training_data, test_data=None, epochs=40, mini_batch_size=10,
-            eta=3.0):
+            eta=2.8):
         self.stochastic_gradient_descent(training_data, epochs, mini_batch_size,
             eta, test_data)
 
@@ -95,7 +95,7 @@ class Network(object):
         cPickle.dump(parameters, open(Network.parameters_path, "wb" ))
 
     def load_parameters(self):
-        (self.weights, self.biases, self.best_training_accuracy) = cPickle.load(
+        (self.weights, self.biases, self.training_accuracy) = cPickle.load(
             open(Network.parameters_path, "rb" ))
 
     def update_parameters(self, mini_batch, eta):
@@ -155,7 +155,6 @@ class Network(object):
         neuron in the final layer has the highest activation."""
         test_results = [(np.argmax(self.feedforward(x)), y)
                         for (x, y) in test_data]
-        print(test_results[900:])
         return sum(int(x == y) for (x, y) in test_results)
 
     def cost_derivative(self, output_activations, y):

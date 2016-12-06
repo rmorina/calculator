@@ -38,6 +38,7 @@ def load_data(path):
             else:
                 images = np.append(images, im, axis=0)
             labels = np.append(labels, symbol_digit)
+    labels = labels.astype('int64')
     return (images, labels)
 
 def convert_to_pickle():
@@ -53,6 +54,3 @@ def convert_to_pickle():
     all_data = (training_data, test_data, test_data)
     cPickle.dump(all_data, open( "processed_data/symbols.pkl", "wb" ))
     return all_data
-
-all_data = convert_to_pickle()
-
